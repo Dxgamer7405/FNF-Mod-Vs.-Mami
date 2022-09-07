@@ -1245,6 +1245,10 @@ class PlayState extends MusicBeatState
 		healthDrainIndicator.cameras = [camHUD];
 		scoreTxt.cameras = [camHUD];
 		doof.cameras = [camOVERLAY];
+		#if android
+		addAndroidControls();
+		androidControls.visible = true;
+		#end
 		if (FlxG.save.data.songPosition)
 		{
 			songPosBG.cameras = [camHUD];
@@ -2523,7 +2527,7 @@ class PlayState extends MusicBeatState
 			scoreTxt.text = "Suggested Offset: " + offsetTest;
 
 		}
-		if (FlxG.keys.justPressed.ENTER && startedCountdown && canPause)
+		if (FlxG.keys.justPressed.ENTER #if android || FlxG.android.justReleased.BACK #end && startedCountdown && canPause)
 		{
 			persistentUpdate = false;
 			persistentDraw = true;
@@ -3374,8 +3378,6 @@ class PlayState extends MusicBeatState
 
 	function endSong():Void
 	{
-		if (!loadRep)
-			rep.SaveReplay();
 
 		if (executeModchart)
 		{
