@@ -1,30 +1,19 @@
-//This was made by GWebDev lol btw this uses actuate
 package;
 
-import motion.Actuate;
-import openfl.display.Sprite;
-import openfl.events.AsyncErrorEvent;
-import openfl.events.MouseEvent;
-import openfl.events.NetStatusEvent;
-import openfl.media.Video;
-import openfl.net.NetConnection;
-import openfl.net.NetStream;
 import flixel.FlxG;
+import openfl.display.Sprite;
+import webm.*;
 
-using StringTools;
-
-class VideoHandler
+class WebmHandler
 {
-	public var netStream:NetStream;
-	public var video:Video;
-	public var isReady:Bool = false;
-	public var addOverlay:Bool = false;
+	#if sys
+	public var webm:WebmPlayer;
 	public var vidPath:String = "";
-	public var ignoreShit:Bool = false;
+	public var io:WebmIo;
+	public var initialized:Bool = false;
 	
 	public function new()
 	{
-		isReady = false;
 	}
 	
 	public function source(?vPath:String):Void
@@ -35,80 +24,63 @@ class VideoHandler
 		}
 	}
 	
-	public function init1():Void
+	public function makePlayer():Void
 	{
-		isReady = false;
-		video = new Video();
-		video.visible = false;
+		io = new WebmIoFile(vidPath);
+		webm = new WebmPlayer();
+		webm.fuck(io, false);
+		webm.addEventListener(WebmEvent.PLAY, function(e) {
+			onPlay();
+		});
+		webm.addEventListener(WebmEvent.COMPLETE, function(e) {
+			onEnd();
+		});
+		webm.addEventListener(WebmEvent.STOP, function(e) {
+			onStop();
+		});
+		webm.addEventListener(WebmEvent.RESTART, function(e) {
+			onRestart();
+		});
+		webm.visible = false;
+		initialized = true;
 	}
 	
-	public function init2():Void
+	public function updatePlayer():Void
 	{
-		#if web
-		var netConnection = new NetConnection ();
-		netConnection.connect (null);
-		
-		netStream = new NetStream (netConnection);
-		netStream.client = { onMetaData: client_onMetaData };
-		netStream.addEventListener (AsyncErrorEvent.ASYNC_ERROR, netStream_onAsyncError);
-
-		netConnection.addEventListener (NetStatusEvent.NET_STATUS, netConnection_onNetStatus);
-		netConnection.addEventListener (NetStatusEvent.NET_STATUS, onPlay);
-		netConnection.addEventListener (NetStatusEvent.NET_STATUS, onEnd);
-		#end
-	}
-	
-	public function client_onMetaData (metaData:Dynamic) {
-		
-		video.attachNetStream (netStream);
-		
-		video.width = FlxG.width;
-		video.height = FlxG.height;
-		
-	}
-	
-	
-	public function netStream_onAsyncError (event:AsyncErrorEvent):Void {
-		
-		trace ("Error loading video");
-		
-	}
-	
-	
-	public function netConnection_onNetStatus (event:NetStatusEvent):Void {
-		trace (event.info.code);
+		io = new WebmIoFile(vidPath);
+		webm.fuck(io, false);
 	}
 	
 	public function play():Void
 	{
-		#if web
-		ignoreShit = true;
-		netStream.close();
-		init2();
-		netStream.play(vidPath);
-		ignoreShit = false;
-		#end
-		trace(vidPath);
+		if (initialized)
+		{
+			webm.play();
+		}
 	}
 	
 	public function stop():Void
 	{
-		netStream.close();
-		onStop();
+		if (initialized)
+		{
+			webm.stop();
+		}
 	}
 	
 	public function restart():Void
 	{
-		play();
-		onRestart();
+		if (initialized)
+		{
+			webm.restart();
+		}
 	}
 	
-	public function update(elapsed:Float):Void
+	public function update(elapsed:Float)
 	{
-		video.x = GlobalVideo.calc(0);
-		video.y = GlobalVideo.calc(1);
-		video.width = GlobalVideo.calc(2);
-		video.height = GlobalVideo.calc(3);
+		webm.x = GlobalVideo.calc(0);
+		webm.y = GlobalVideo.calc(1);
+		webm.width = GlobalVideo.calc(2);
+		webm.height = GlobalVideo.calc(3);
 	}
 	
 	public var stopped:Bool = false;
@@ -119,13 +91,13 @@ class VideoHandler
 	
 	public function pause():Void
 	{
-		netStream.pause();
+		webm.changePlaying(false);
 		paused = true;
 	}
 	
 	public function resume():Void
 	{
-		netStream.resume();
+		webm.changePlaying(true);
 		paused = false;
 	}
 	
@@ -142,14 +114,12 @@ class VideoHandler
 	public function clearPause():Void
 	{
 		paused = false;
+		webm.removePause();
 	}
 	
 	public function onStop():Void
 	{
-		if (!ignoreShit)
-		{
-			stopped = true;
-		}
+		stopped = true;
 	}
 	
 	public function onRestart():Void
@@ -157,39 +127,207 @@ class VideoHandler
 		restarted = true;
 	}
 	
-	public function onPlay(event:NetStatusEvent):Void
+	public function onPlay():Void
 	{
-		if (event.info.code == "NetStream.Play.Start")
-		{
-			played = true;
-		}
+		played = true;
 	}
 	
-	public function onEnd(event:NetStatusEvent):Void
+	public function onEnd():Void
 	{
-		if (event.info.code == "NetStream.Play.Complete")
-		{
-			ended = true;
-		}
+		trace("IT ENDED!");
+		ended = true;
 	}
 	
 	public function alpha():Void
 	{
-		video.alpha = GlobalVideo.daAlpha1;
+		webm.alpha = GlobalVideo.daAlpha1;
 	}
 	
 	public function unalpha():Void
 	{
-		video.alpha = GlobalVideo.daAlpha2;
+		webm.alpha = GlobalVideo.daAlpha2;
 	}
 	
 	public function hide():Void
 	{
-		video.visible = false;
+		webm.visible = false;
 	}
 	
 	public function show():Void
 	{
-		video.visible = true;
+		webm.visible = true;
 	}
+	#else
+	public var webm:Sprite;
+	public function new()
+	{
+	trace("THIS IS ANDROID! or some shit...");
+	}
+	#end
+}package;
+
+import flixel.FlxG;
+import openfl.display.Sprite;
+import webm.*;
+
+class WebmHandler
+{
+	#if sys
+	public var webm:WebmPlayer;
+	public var vidPath:String = "";
+	public var io:WebmIo;
+	public var initialized:Bool = false;
+	
+	public function new()
+	{
+	}
+	
+	public function source(?vPath:String):Void
+	{
+		if (vPath != null && vPath.length > 0)
+		{
+		vidPath = vPath;
+		}
+	}
+	
+	public function makePlayer():Void
+	{
+		io = new WebmIoFile(vidPath);
+		webm = new WebmPlayer();
+		webm.fuck(io, false);
+		webm.addEventListener(WebmEvent.PLAY, function(e) {
+			onPlay();
+		});
+		webm.addEventListener(WebmEvent.COMPLETE, function(e) {
+			onEnd();
+		});
+		webm.addEventListener(WebmEvent.STOP, function(e) {
+			onStop();
+		});
+		webm.addEventListener(WebmEvent.RESTART, function(e) {
+			onRestart();
+		});
+		webm.visible = false;
+		initialized = true;
+	}
+	
+	public function updatePlayer():Void
+	{
+		io = new WebmIoFile(vidPath);
+		webm.fuck(io, false);
+	}
+	
+	public function play():Void
+	{
+		if (initialized)
+		{
+			webm.play();
+		}
+	}
+	
+	public function stop():Void
+	{
+		if (initialized)
+		{
+			webm.stop();
+		}
+	}
+	
+	public function restart():Void
+	{
+		if (initialized)
+		{
+			webm.restart();
+		}
+	}
+	
+	public function update(elapsed:Float)
+	{
+		webm.x = GlobalVideo.calc(0);
+		webm.y = GlobalVideo.calc(1);
+		webm.width = GlobalVideo.calc(2);
+		webm.height = GlobalVideo.calc(3);
+	}
+	
+	public var stopped:Bool = false;
+	public var restarted:Bool = false;
+	public var played:Bool = false;
+	public var ended:Bool = false;
+	public var paused:Bool = false;
+	
+	public function pause():Void
+	{
+		webm.changePlaying(false);
+		paused = true;
+	}
+	
+	public function resume():Void
+	{
+		webm.changePlaying(true);
+		paused = false;
+	}
+	
+	public function togglePause():Void
+	{
+		if (paused)
+		{
+			resume();
+		} else {
+			pause();
+		}
+	}
+	
+	public function clearPause():Void
+	{
+		paused = false;
+		webm.removePause();
+	}
+	
+	public function onStop():Void
+	{
+		stopped = true;
+	}
+	
+	public function onRestart():Void
+	{
+		restarted = true;
+	}
+	
+	public function onPlay():Void
+	{
+		played = true;
+	}
+	
+	public function onEnd():Void
+	{
+		trace("IT ENDED!");
+		ended = true;
+	}
+	
+	public function alpha():Void
+	{
+		webm.alpha = GlobalVideo.daAlpha1;
+	}
+	
+	public function unalpha():Void
+	{
+		webm.alpha = GlobalVideo.daAlpha2;
+	}
+	
+	public function hide():Void
+	{
+		webm.visible = false;
+	}
+	
+	public function show():Void
+	{
+		webm.visible = true;
+	}
+	#else
+	public var webm:Sprite;
+	public function new()
+	{
+	trace("THIS IS ANDROID! or some shit...");
+	}
+	#end
 }
