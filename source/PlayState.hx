@@ -500,7 +500,7 @@ class PlayState extends MusicBeatState
 		bfnoteMovementXoffset = 0;
 		bfnoteMovementYoffset = 0;
 
-		#if sys
+		#if desktop
 		executeModchart = FileSystem.exists(Paths.lua(PlayState.SONG.song.toLowerCase()  + "/modchart"));
 		#end
 		#if !cpp
