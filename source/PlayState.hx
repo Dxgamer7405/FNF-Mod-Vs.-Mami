@@ -1425,7 +1425,6 @@ class PlayState extends MusicBeatState
 	function salvationIntro(?dialogueBox:DialogueBox):Void
 		{
 			songCleared = true;
-			inCutscene = true;
 			generatedMusic = false;
 			canPause = false;
 			camZooming = false;
