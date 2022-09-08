@@ -53,6 +53,7 @@ jobs:
           haxelib install flixel-addons
           haxelib git linc_luajit https://github.com/MAJigsaw77/linc_luajit
           haxelib git extension-webview https://github.com/MatheusSilver/extension-webview
+          haxelib git extension-webm https://github.com/Sirox228/extension-webm
           haxelib git polymod https://github.com/MasterEric/polymod
           haxelib git newgrounds https://github.com/Geokureli/Newgrounds
           haxelib list
@@ -77,5 +78,5 @@ jobs:
       - name: Publish Artifact
         uses: actions/upload-artifact@v2.2.4
         with:
-          name: Whitty Android Build
+          name: Mami Full Week Android Build
           path: export/release/android/bin/app/build/outputs/apk/debug
