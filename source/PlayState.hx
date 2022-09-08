@@ -500,7 +500,7 @@ class PlayState extends MusicBeatState
 		bfnoteMovementXoffset = 0;
 		bfnoteMovementYoffset = 0;
 
-		#if desktop
+		#if sys
 		executeModchart = FileSystem.exists(Paths.lua(PlayState.SONG.song.toLowerCase()  + "/modchart"));
 		#end
 		#if !cpp
@@ -3378,7 +3378,6 @@ class PlayState extends MusicBeatState
 
 	function endSong():Void
 	{
-
 		if (executeModchart)
 		{
 			Lua.close(lua);
@@ -3471,6 +3470,13 @@ class PlayState extends MusicBeatState
 
 					PlayState.SONG = Song.loadFromJson(PlayState.storyPlaylist[0].toLowerCase() + difficulty, PlayState.storyPlaylist[0]);
 					FlxG.sound.music.stop();
+					switch(SONG.song.toLowerCase())
+					{
+						case 'salvation':
+							LoadingState.loadAndSwitchState(new VideoState("assets/videos/Salvation_Finale.webm", new PlayState()));
+						default:
+							LoadingState.loadAndSwitchState(new PlayState());
+					}
 
 					if (SONG.song.toLowerCase() == 'salvation')
 						{
