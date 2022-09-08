@@ -2,11 +2,13 @@ package;
 
 import flixel.FlxG;
 import openfl.display.Sprite;
+#if cpp
 import webm.*;
+#end
 
 class WebmHandler
 {
-	#if sys
+	#if cpp
 	public var webm:WebmPlayer;
 	public var vidPath:String = "";
 	public var io:WebmIo;
@@ -26,7 +28,13 @@ class WebmHandler
 	
 	public function makePlayer():Void
 	{
-		io = new WebmIoFile(vidPath);
+		#if android
+		var path = Asset2File.getPath(vidPath);
+		#else
+		var path = vidPath;
+		#end
+
+		io = new WebmIoFile(path);
 		webm = new WebmPlayer();
 		webm.fuck(io, false);
 		webm.addEventListener(WebmEvent.PLAY, function(e) {
@@ -47,7 +55,13 @@ class WebmHandler
 	
 	public function updatePlayer():Void
 	{
-		io = new WebmIoFile(vidPath);
+		#if android
+		var path = Asset2File.getPath(vidPath);
+		#else
+		var path = vidPath;
+		#end
+
+		io = new WebmIoFile(path);
 		webm.fuck(io, false);
 	}
 	
