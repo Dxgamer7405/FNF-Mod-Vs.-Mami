@@ -295,7 +295,7 @@ for (touch in FlxG.touches.list)
 
 		dialogueOpened = true;
 
-		if (FlxG.keys.justPressed.ESCAPE #if android || justTouched #end && dialogueStarted == true && dialogueSkipped == false)
+		if (FlxG.keys.justPressed.ESCAPE && dialogueStarted == true && dialogueSkipped == false)
 			{
 				isEnding = true;
 				dialogueSkipped = true;
@@ -337,7 +337,7 @@ for (touch in FlxG.touches.list)
 		}
 				
 
-		if (FlxG.keys.justPressed.ENTER && dialogueStarted == true && isEnding == false)
+		if (FlxG.keys.justPressed.ENTER #if android || justTouched #end && dialogueStarted == true && isEnding == false)
 		{
 			remove(dialogue);
 				
