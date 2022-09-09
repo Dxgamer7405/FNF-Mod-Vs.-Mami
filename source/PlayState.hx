@@ -514,7 +514,7 @@ class PlayState extends MusicBeatState
 		switch (storyDifficulty)
 		{
 			case 0:
-				storyDifficultyText = "Easy";
+				 = "Easy";
 			case 1:
 				storyDifficultyText = "Normal";
 			case 2:
@@ -1330,6 +1330,9 @@ class PlayState extends MusicBeatState
 					startCountdown();
 			}
 		}
+
+    if (!loadRep)
+			rep = new Replay("na");
 
 		super.create();
 	}
